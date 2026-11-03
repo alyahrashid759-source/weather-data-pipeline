@@ -1,0 +1,5 @@
+data/*.duckdb
+__pycache__/
+.venv/
+dbt_project/target/
+dbt_project/logs/
