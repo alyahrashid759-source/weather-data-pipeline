@@ -1,19 +1,61 @@
-"""Lightweight data quality checks run before loading."""
+"""Data quality checks applied before records enter the warehouse."""
+
+from __future__ import annotations
+
+import math
+from collections.abc import Iterable, Mapping
 
 
-class DataQualityError(Exception):
-    pass
+class DataQualityError(ValueError):
+    """Raised when extracted weather records violate the data contract."""
 
 
-def validate(rows: list[dict]) -> None:
-    if not rows:
+REQUIRED_FIELDS = (
+    "city",
+    "observed_at",
+    "temperature_c",
+    "humidity_pct",
+    "wind_kmh",
+)
+
+
+def validate(rows: Iterable[Mapping]) -> None:
+    """Validate required keys, uniqueness, numeric values, and domain ranges."""
+    records = list(rows)
+    if not records:
         raise DataQualityError("No rows extracted")
-    for r in rows:
-        if r["city"] is None or r["observed_at"] is None:
-            raise DataQualityError(f"Missing key fields: {r}")
-        t = r["temperature_c"]
-        if t is not None and not -90 <= t <= 60:
-            raise DataQualityError(f"Temperature out of range: {r}")
-        h = r["humidity_pct"]
-        if h is not None and not 0 <= h <= 100:
-            raise DataQualityError(f"Humidity out of range: {r}")
+
+    seen_keys: set[tuple[str, str]] = set()
+    for row_number, row in enumerate(records, start=1):
+        missing = [field for field in REQUIRED_FIELDS if field not in row]
+        if missing:
+            raise DataQualityError(
+                f"Row {row_number} is missing required fields: {', '.join(missing)}"
+            )
+
+        city = row["city"]
+        observed_at = row["observed_at"]
+        if not isinstance(city, str) or not city.strip():
+            raise DataQualityError(f"Row {row_number} has an invalid city")
+        if not isinstance(observed_at, str) or not observed_at.strip():
+            raise DataQualityError(f"Row {row_number} has an invalid observed_at")
+
+        key = (city, observed_at)
+        if key in seen_keys:
+            raise DataQualityError(f"Duplicate weather observation: {key}")
+        seen_keys.add(key)
+
+        for field, lower, upper in (
+            ("temperature_c", -90, 60),
+            ("humidity_pct", 0, 100),
+            ("wind_kmh", 0, 400),
+        ):
+            value = row[field]
+            if value is None or isinstance(value, bool):
+                raise DataQualityError(f"Row {row_number} has null/invalid {field}")
+            if not isinstance(value, (int, float)) or not math.isfinite(value):
+                raise DataQualityError(f"Row {row_number} has non-numeric {field}")
+            if not lower <= value <= upper:
+                raise DataQualityError(
+                    f"Row {row_number} has out-of-range {field}: {value}"
+                )
