@@ -128,3 +128,30 @@ This is a portfolio-scale batch pipeline, not a high-availability production wea
 ## Author
 
 Built as a hands-on Data Engineering portfolio project.
+
+
+## Portfolio documentation
+
+- [Architecture, data flow, and data contract](docs/architecture.md)
+- [Example analytics and data-quality SQL](docs/analytics_queries.sql)
+- [Interview walkthrough and design decisions](docs/interview_guide.md)
+
+## Local verification checklist
+
+Run these from the repository root after installing the requirements:
+
+```bash
+python src/pipeline.py
+pytest -q
+ruff check src tests dags --ignore E401,E402
+```
+
+Then build the dbt models:
+
+```bash
+cd dbt_project
+dbt debug --profiles-dir .
+dbt build --profiles-dir .
+```
+
+Finally, inspect the mart using the SQL examples in [docs/analytics_queries.sql](docs/analytics_queries.sql). The local execution and Airflow runtime should be verified on the machine/environment where they are installed before describing them as successfully run.
