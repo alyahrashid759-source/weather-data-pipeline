@@ -1,17 +1,30 @@
 version: 2
+
 sources:
   - name: raw
     schema: raw
     tables:
       - name: weather
+        description: Raw hourly weather observations loaded by the Python ingestion pipeline.
+        columns:
+          - name: city
+            tests: [not_null]
+          - name: observed_at
+            tests: [not_null]
+
 models:
   - name: stg_weather
+    description: Typed and standardized hourly weather observations.
     columns:
       - name: city
         tests: [not_null]
       - name: observed_at
         tests: [not_null]
+      - name: obs_date
+        tests: [not_null]
+
   - name: daily_weather
+    description: Daily city-level weather metrics for analytics and reporting.
     columns:
       - name: city
         tests: [not_null]
