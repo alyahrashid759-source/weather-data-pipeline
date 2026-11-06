@@ -155,3 +155,18 @@ dbt build --profiles-dir .
 ```
 
 Finally, inspect the mart using the SQL examples in [docs/analytics_queries.sql](docs/analytics_queries.sql). The local execution and Airflow runtime should be verified on the machine/environment where they are installed before describing them as successfully run.
+
+## Run with Docker (Airflow + PostgreSQL)
+
+Docker provides a reproducible Airflow environment with pinned, compatible dbt dependencies. From the repository root:
+
+```bash
+docker compose build
+docker compose up airflow-init
+docker compose up -d
+docker compose ps
+```
+
+Open [http://localhost:8080](http://localhost:8080) and sign in with the local demo credentials `airflow` / `airflow`. Unpause `weather_pipeline` and trigger a run. See [docs/docker-airflow.md](docs/docker-airflow.md) for setup, logs, shutdown, and troubleshooting.
+
+The Compose stack uses PostgreSQL for Airflow metadata and keeps the weather warehouse in the project DuckDB file. This is a local portfolio environment, not a production deployment.
