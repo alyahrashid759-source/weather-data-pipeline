@@ -1,6 +1,6 @@
 FROM apache/airflow:2.10.5-python3.11
 
-# Install Git and runtime dependencies for the ingestion task.
+# Git is required by dbt project diagnostics.
 USER root
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git \
@@ -9,14 +9,18 @@ RUN apt-get update \
 
 USER airflow
 
-# Keep Airflow's own environment compatible with the official constraints.
+# Install Airflow using its official constraints only.
 RUN pip install --no-cache-dir \
     "apache-airflow==2.10.5" \
-    "requests>=2.32,<3" \
-    "duckdb>=1.2,<3" \
     --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.10.5/constraints-3.11.txt"
 
-# Isolate dbt from Airflow's pinned dependencies to avoid protobuf conflicts.
+# Keep ingestion dependencies isolated from Airflow's pinned dependencies.
+RUN python -m venv /home/airflow/project-venv \
+    && /home/airflow/project-venv/bin/pip install --no-cache-dir \
+    "requests>=2.32,<3" \
+    "duckdb>=1.2,<3"
+
+# Keep dbt isolated too; its dependency tree can differ from Airflow's.
 RUN python -m venv /home/airflow/dbt-venv \
     && /home/airflow/dbt-venv/bin/pip install --no-cache-dir \
     "dbt-core==1.9.4" \
