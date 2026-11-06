@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, "feature/**"]
+    branches: [main, "feature/**", "fix/**"]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -41,3 +41,18 @@ jobs:
       - name: Validate dbt project
         working-directory: dbt_project
         run: dbt parse --profiles-dir .
+
+
+  docker-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build Airflow image
+        run: docker build --tag weather-data-pipeline-airflow:ci .
+
+      - name: Verify runtime tools in image
+        run: |
+          docker run --rm weather-data-pipeline-airflow:ci git --version
+          docker run --rm weather-data-pipeline-airflow:ci dbt --version
