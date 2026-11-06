@@ -54,4 +54,4 @@ jobs:
 
       - name: Verify runtime tools in image
         run: |
-          docker run --rm --entrypoint /bin/bash weather-data-pipeline-airflow:ci -c "git --version && /home/airflow/dbt-venv/bin/dbt --version && /home/airflow/project-venv/bin/python -c 'import requests, duckdb; print(\\"project dependencies OK\\")'"
+      run: docker run --rm --entrypoint /bin/bash weather-data-pipeline-airflow:ci -c "git --version && /home/airflow/dbt-venv/bin/dbt --version && /home/airflow/project-venv/bin/python -m pip show requests duckdb"
