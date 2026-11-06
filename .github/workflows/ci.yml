@@ -54,5 +54,4 @@ jobs:
 
       - name: Verify runtime tools in image
         run: |
-          docker run --rm weather-data-pipeline-airflow:ci git --version
-          docker run --rm weather-data-pipeline-airflow:ci dbt --version
+          docker run --rm --entrypoint /bin/bash weather-data-pipeline-airflow:ci -lc "git --version && dbt --version"
