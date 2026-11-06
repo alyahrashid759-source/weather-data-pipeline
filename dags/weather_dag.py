@@ -25,7 +25,7 @@ with DAG(
 ) as dag:
     ingest = BashOperator(
         task_id="extract_validate_load",
-        bash_command=f"cd {PROJECT_DIR} && python src/pipeline.py",
+        bash_command=f"cd {PROJECT_DIR} && /home/airflow/project-venv/bin/python src/pipeline.py",
     )
 
     transform = BashOperator(
