@@ -1,5 +1,14 @@
 FROM apache/airflow:2.10.5-python3.11
 
+# dbt's project diagnostics require the git executable. Install OS packages
+# as root, then return to the non-root Airflow user before installing Python
+# dependencies.
+USER root
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 USER airflow
 
 # Keep Airflow pinned to its official Python 3.11 constraints, then add
