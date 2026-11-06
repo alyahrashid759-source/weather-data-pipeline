@@ -19,4 +19,5 @@ RUN pip install --no-cache-dir \
     && pip install --no-cache-dir \
     "dbt-core==1.9.4" \
     "dbt-duckdb==1.9.3" \
-    "requests>=2.32,<3"
+    "requests>=2.32,<3" \
+    --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.10.5/constraints-3.11.txt"
